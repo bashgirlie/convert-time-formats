@@ -5,7 +5,7 @@ import urllib.parse
 
 
 parser = argparse.ArgumentParser(description="Convert timestamp to human-readable format")
-parser.add_argument("timestamp", help="Timestamp in YYYYMMDDHHMMSS.fff format")
+parser.add_argument("timestamp", help="Timestamp in YYYYMMDDHHMMSS.fff or MM/DD/YYYY HH:MM:SS format")
 parser.add_argument("--current-time", action="store_true", help="print current time in ISO 8601")
 
 def convert_from_iso(timestamp):
