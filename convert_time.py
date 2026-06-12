@@ -60,13 +60,21 @@ def current_time():
     basic_iso = now.strftime("%Y%m%d%H%M%S.%f")[:-3]
     return basic_iso
 
+
 if __name__ == '__main__':
     args = parser.parse_args()
-    timestamp_str = args.timestamp
-    format = check_format(timestamp_str=timestamp_str)
-    if format == "iso":
-        convert_from_iso(timestamp_str)
-    elif format == "slash":
-        convert_to_iso_8601(timestamp_str)
+    
+    if args.timestamp:
+        timestamp_str = args.timestamp
+        format = check_format(timestamp_str=timestamp_str)
+        if format == "iso":
+            convert_from_iso(timestamp_str)
+        elif format == "slash":
+            convert_to_iso_8601(timestamp_str)
+    
     if args.current_time:
         print(f"Current time: {current_time()}")
+
+    if not args.timestamp and not args.current_time:
+        parser.print_help()
+        sys.exit(1)
