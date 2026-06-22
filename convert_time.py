@@ -107,7 +107,12 @@ def convert_from_epoch(epoch_val, target_tz):
     '''
     Detect 13-digit epoch time
     '''
-    dt_obj = datetime.fromtimestamp(float(epoch_val), tz=timezone.utc)
+    epoch_float = float(epoch_val)
+    if epoch_float > 99999999999:
+        epoch_float = epoch_float / 1000.0
+
+    
+    dt_obj = datetime.fromtimestamp(float(epoch_float), tz=timezone.utc)
     dt_obj = convert_timezone(dt_obj, target_tz)
 
 
@@ -115,7 +120,7 @@ def convert_from_epoch(epoch_val, target_tz):
     human_readable = dt_obj.strftime("%m/%d/%Y %I:%M:%S %p")
     military_time = dt_obj.strftime("%H%M")
     military_time_seconds = dt_obj.strftime("%H%M%S")
-    iso8601 = dt_obj.strftime("%Y%m%d%H%M%S.%f")[:-3]
+    iso8601 = dt_obj.strftime("%Y-%m-%dT%H:%M:%S.") + f"{dt_obj.microsecond // 1000:03d}" + dt_obj.strftime("%z")
     iso8601_encoded = urllib.parse.quote(iso8601, safe="")
     print(f"Human Readable: {human_readable}")
     print(f"Military Time: {military_time}")
