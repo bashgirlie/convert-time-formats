@@ -20,4 +20,4 @@ Convert to or from Slash and ISO datetime formats
 - With Timezone conversion
 `python3 convert_timestamp.py 20260622140214.664 -tz "US/Central"`
  Or
-`python3 convert_timestamp.py 20260622140214.664 -tz "US/Central"`
+`python3 convert_timestamp.py 20260622140214.664 -tz "America/New_York"`
