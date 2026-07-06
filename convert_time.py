@@ -12,7 +12,7 @@ parser.add_argument("--current-time", action="store_true", help="print current t
 parser.add_argument("-tz", "--timezone", default="UTC", help="Target timezone (e.g., America/New_York)")
 
 def check_format(timestamp_str):
-    if re.match(r"^\d{2}/\d{2}/\d{4} \d{1,2}:\d{2}:\d{2}$", timestamp_str):
+    if re.match(r"^\d{2}/\d{2}/\d{4}( \d{1,2}:\d{2}:\d{2})?$", timestamp_str):
         print("Detected Standard Slash format (MM/DD/YYYY HH:MM:SS)")
         return "slash"
     
@@ -92,16 +92,32 @@ def convert_from_iso(timestamp, target_tz):
     print(f"ISO 8601: {iso8601}")
     print(f"ISO 8601 URL Encoded: {iso8601_encoded}")
 
-def convert_to_iso_8601(source_str, target_tz):
+def convert_from_slash(source_str, target_tz):
     '''
-    take a time string: "MM/DD/YYYY HH:MM:SS"
+    take a time string: "MM/DD/YYYY HH:MM:SS" or "MM/DD/YYYY"
     '''
+    if " " not in source_str:
+        source_str += " 00:00:00"
     dt_obj = datetime.strptime(source_str, "%m/%d/%Y %H:%M:%S")
     #apply timezone conversion
     dt_obj = convert_timezone(dt_obj, target_tz)
-    raw_target = dt_obj.strftime("%Y%m%d%H%M%S.%f")
-    final = raw_target[:-3]
-    print(f"ISO 8601 timestamp: {final}")
+    # Standard ISO 8601 presentation with timezone offset
+    iso8601 = dt_obj.strftime("%Y-%m-%dT%H:%M:%S.") + f"{dt_obj.microsecond // 1000:03d}" + dt_obj.strftime("%z")
+    iso8601_encoded = urllib.parse.quote(iso8601, safe="")
+    iso8601_raw_timestamp = dt_obj.strftime("%Y%m%d%H%M%S.%f")[:-3]
+    
+    hours = dt_obj.strftime("%H")
+    minutes = dt_obj.strftime("%M")
+    seconds = dt_obj.strftime("%S")
+    
+    military_time = f"{hours}{minutes} hours"
+    military_time_with_seconds = f"{hours}:{minutes}:{seconds}"
+    print(f"Original: {timestamp_str}")
+    print(f"Military Time: {military_time}")
+    print(f"Military Time with Seconds: {military_time_with_seconds}")
+    print(f"ISO 8601 Raw Timestamp: {iso8601_raw_timestamp}")
+    print(f"ISO 8601: {iso8601}")
+    print(f"ISO 8601 URL Encoded: {iso8601_encoded}")
 
 def convert_from_epoch(epoch_val, target_tz):
     '''
@@ -144,7 +160,7 @@ if __name__ == '__main__':
         if format == "iso":
             convert_from_iso(timestamp_str, args.timezone)
         elif format == "slash":
-            convert_to_iso_8601(timestamp_str, args.timezone)
+            convert_from_slash(timestamp_str, args.timezone)
         elif format == "epoch":
             convert_from_epoch(timestamp_str, args.timezone)
     
