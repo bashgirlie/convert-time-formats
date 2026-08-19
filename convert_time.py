@@ -16,6 +16,10 @@ def check_format(timestamp_str):
         print("Detected Standard Slash format (MM/DD/YYYY HH:MM:SS)")
         return "slash"
     
+    if re.search(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$", timestamp_str):
+        print("Detected Extended ISO 8601 format")
+        return "extended_iso"
+    
     if re.search(r"(\d{14})\.(\d{3})", timestamp_str):
         print("Detected ISO 8601 Format")
         return "iso"
@@ -144,7 +148,31 @@ def convert_from_epoch(epoch_val, target_tz):
     print(f"ISO 8601: {iso8601}")
     print(f"ISO 8601 URL Encoded: {iso8601_encoded}")
 
+def convert_from_extended_iso(timestamp_str, target_tz):
+    """
+    Convert an extended ISO 8601 timestamp to various formats.
+    """
+    dt_obj = datetime.fromisoformat(timestamp_str)
+    dt_obj = convert_timezone(dt_obj, target_tz)
 
+    human_readable = dt_obj.strftime("%B %d, %Y, %I:%M:%S.%f")[:-3] + " " + dt_obj.strftime("%p")
+    
+    hours = dt_obj.strftime("%H")
+    minutes = dt_obj.strftime("%M")
+    seconds = dt_obj.strftime("%S")
+    
+    military_time = f"{hours}{minutes} hours"
+    military_time_with_seconds = f"{hours}:{minutes}:{seconds}"
+    
+    iso8601 = dt_obj.strftime("%Y-%m-%dT%H:%M:%S.") + f"{dt_obj.microsecond // 1000:03d}" + dt_obj.strftime("%z")
+    iso8601_encoded = urllib.parse.quote(iso8601, safe="")
+
+    print(f"Original: {timestamp_str}")
+    print(f"Human Readable: {human_readable}")
+    print(f"Military Time: {military_time}")
+    print(f"Military Time with Seconds: {military_time_with_seconds}")
+    print(f"ISO 8601: {iso8601}")
+    print(f"ISO 8601 URL Encoded: {iso8601_encoded}")
 
 def current_time():
     now = datetime.now()
@@ -163,6 +191,8 @@ if __name__ == '__main__':
             convert_from_slash(timestamp_str, args.timezone)
         elif format == "epoch":
             convert_from_epoch(timestamp_str, args.timezone)
+        elif format == "extended_iso":
+            convert_from_extended_iso(timestamp_str, args.timezone)
     
     if args.current_time:
         print(f"Current time: {current_time()}")
